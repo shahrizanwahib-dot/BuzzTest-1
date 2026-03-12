@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesi Ulang Kaji (Auto-Sync) - IGCSE FL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Bangers&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0f172a;
+            --emerald: #059669;
+            --accent: #d97706;
+            --dark: #1e293b;
+            --paper: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #e2e8f0;
+            color: var(--dark);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .font-bangers { font-family: 'Bangers', system-ui; letter-spacing: 2px; }
+
+        /* Slaid Guru Styles */
+        .slide {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            padding: 2rem;
+            animation: slideFade 0.4s ease-in-out;
+            position: absolute;
+            top: 0; left: 0;
+            background: var(--paper);
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .slide.active { display: flex; flex-direction: column; z-index: 10; }
+
+        @keyframes slideFade {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes popIn { 
+            0% { transform: scale(0.5); opacity: 0; } 
+            80% { transform: scale(1.05); opacity: 1; } 
+            100% { transform: scale(1); opacity: 1; } 
+        }
+        .animate-popIn { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        .btn-nav {
+            background: var(--dark);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            font-weight: 800;
+            transition: all 0.2s;
+            border: 2px solid var(--dark);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-nav:hover {
+            background: white;
+            color: var(--dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-nav:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .content-box {
+            background: white;
+            border: 2px solid var(--dark);
+            box-shadow: 6px 6px 0px rgba(30, 41, 59, 1);
+            padding: 3rem;
+            border-radius: 16px;
+        }
+
+        /* Family Feud Board Styles */
+        .feud-board {
+            background: radial-gradient(circle, #2563eb, #1e3a8a);
+            border: 6px solid #fbbf24;
+            border-radius: 20px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 6px 6px 0px rgba(30, 41, 59, 1);
+            padding: 1.5rem;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            height: 90px;
+            perspective: 1000px;
+            cursor: default;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateX(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #fbbf24;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .flip-card-front {
+            background: linear-gradient(to bottom, #1e40af, #1e3a8a);
+            color: #fbbf24;
+        }
+        
+        .flip-card-front .number-circle {
+            width: 60px;
+            height: 40px;
+            background-color: #1e3a8a;
+            border: 2px solid #fbbf24;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bangers', cursive;
+            font-size: 2rem;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .flip-card-back {
+            background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+            color: #1e293b;
+            transform: rotateX(180deg);
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .strike-x {
+            color: #ef4444;
+            text-shadow: 4px 4px 0px #7f1d1d, 0 0 20px rgba(239, 68, 68, 0.8);
+            font-weight: 900;
+        }
+
+        /* Buzzer 3D Styles */
+        .buzzer-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background: var(--dark);
+            box-shadow: 0 10px 0px rgba(15,23,42,1);
+            border: 6px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .real-buzzer-btn {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #ef4444, #b91c1c);
+            box-shadow: 
+                inset 0 -10px 20px rgba(0,0,0,0.4),
+                inset 0 10px 20px rgba(255,255,255,0.5),
+                0 8px 0 #7f1d1d,
+                0 10px 15px rgba(0,0,0,0.4);
+            border: 2px solid #450a0a;
+            cursor: pointer;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .real-buzzer-btn:active:not(.locked), .real-buzzer-btn.pressed {
+            transform: translateY(8px);
+            box-shadow: 
+                inset 0 -5px 15px rgba(0,0,0,0.5),
+                inset 0 5px 15px rgba(255,255,255,0.4),
+                0 0 0 #7f1d1d,
+                0 5px 10px rgba(0,0,0,0.5);
+            background: radial-gradient(circle at 35% 35%, #dc2626, #991b1b);
+        }
+        
+        .real-buzzer-btn.locked {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= 1. PEMILIHAN PERANAN ================= -->
+    <div id="role-screen" class="absolute inset-0 z-[100] flex flex-col items-center justify-center p-6 bg-slate-200" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px;">
+        <div class="content-box max-w-5xl w-full text-center mb-10 animate-popIn">
+            <div class="inline-block bg-indigo-600 text-white font-black px-4 py-1 rounded-full text-xs uppercase tracking-widest mb-4">Edisi Auto-Sync ⚡</div>
+            <h1 class="font-bangers text-[7rem] md:text-[8rem] text-slate-800 uppercase leading-none mb-4">Ulangkaji <span class="text-emerald-600">Tatabahasa</span></h1>
+            <p class="text-2xl font-bold text-slate-600 bg-slate-100 inline-block px-8 py-3 border-2 border-slate-800 rounded">Edisi Ulang Kaji Asas</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-5xl animate-popIn" style="animation-delay: 0.1s;">
+            <button onclick="selectRole('guru')" class="content-box flex flex-col items-center hover:bg-emerald-50 transition-colors transform hover:-translate-y-2 hover:shadow-[8px_8px_0px_rgba(30,41,59,1)]">
+                <div class="w-24 h-24 bg-emerald-200 text-emerald-800 rounded-full border-2 border-slate-800 flex items-center justify-center mb-6"><i class="fas fa-chalkboard-teacher text-4xl"></i></div>
+                <h2 class="font-bangers text-5xl text-slate-800 mb-2 uppercase">Mod Guru</h2>
+                <p class="text-slate-600 font-bold text-lg text-center">Papar slaid dan kawal sistem pemikir pantas secara langsung.</p>
+            </button>
+            <button onclick="selectRole('pelajar')" class="content-box flex flex-col items-center hover:bg-blue-50 transition-colors transform hover:-translate-y-2 hover:shadow-[8px_8px_0px_rgba(30,41,59,1)]">
+                <div class="w-24 h-24 bg-blue-200 text-blue-800 rounded-full border-2 border-slate-800 flex items-center justify-center mb-6"><i class="fas fa-mobile-alt text-4xl"></i></div>
+                <h2 class="font-bangers text-5xl text-slate-800 mb-2 uppercase">Mod Pelajar</h2>
+                <p class="text-slate-600 font-bold text-lg text-center">Gunakan peranti mudah alih sebagai butang fizikal interaktif.</p>
+            </button>
+        </div>
+
+        <!-- Modal Kata Laluan Guru -->
+        <div id="teacher-auth-modal" class="hidden absolute inset-0 z-[110] flex-col items-center justify-center p-6 bg-slate-900/80 backdrop-blur-sm">
+            <div class="content-box max-w-md w-full text-center animate-popIn">
+                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full border-2 border-slate-800 flex items-center justify-center mx-auto mb-6"><i class="fas fa-lock text-4xl"></i></div>
+                <h2 class="font-bangers text-4xl text-slate-800 mb-2 uppercase">Akses Keselamatan</h2>
+                <p class="text-slate-600 text-base mb-6 font-bold">Sila masukkan kata laluan guru.</p>
+                <input type="password" id="teacher-pass-input" placeholder="****" class="w-full p-4 border-2 border-slate-800 rounded-lg mb-6 text-center text-4xl tracking-widest font-black focus:border-emerald-500 focus:outline-none bg-slate-50">
+                <div class="flex gap-4">
+                    <button onclick="cancelTeacherAuth()" class="flex-1 py-4 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-lg rounded-lg border-2 border-transparent transition-colors">Batal</button>
+                    <button onclick="verifyTeacherAuth()" class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg rounded-lg border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b] hover:translate-y-1 hover:shadow-none transition-all">Sahkan</button>
+                </div>
+                <p id="teacher-auth-error" class="text-red-600 font-bold text-sm mt-4 hidden animate-pulse">Kata laluan tidak sah! Sila cuba lagi.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 2. ANTARAMUKA PELAJAR (BUZZER) ================= -->
+    <div id="student-view" class="hidden absolute inset-0 z-[90] flex-col items-center justify-center p-6 text-center bg-slate-200" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; overflow-y: auto;">
+        
+        <!-- Setup Nama -->
+        <div id="student-setup" class="content-box w-full max-w-md animate-popIn">
+            <h2 class="font-bangers text-5xl mb-4 text-slate-800 uppercase">Daftar Masuk</h2>
+            <p class="text-slate-600 mb-6 font-bold text-lg">Sila masukkan nama penuh atau pendek anda.</p>
+            <input type="text" id="stu-name" placeholder="Cth: IMRAN" class="w-full p-5 border-2 border-slate-800 rounded-lg mb-6 text-center text-3xl uppercase font-black focus:border-emerald-500 focus:outline-none bg-slate-50">
+            <button onclick="joinClass()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bangers text-3xl rounded-lg border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b] hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-widest">Masuk Kelas</button>
+        </div>
+
+        <!-- Gameplay Area -->
+        <div id="student-gameplay" class="hidden w-full max-w-md flex-col items-center pb-12">
+            <div id="student-header" class="mb-6 w-full content-box p-4 flex items-center gap-4">
+                <div class="w-14 h-14 bg-emerald-100 border-2 border-slate-800 text-emerald-600 rounded-full flex items-center justify-center text-xl"><i class="fas fa-user"></i></div>
+                <div class="text-left">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Pemain Semasa</p>
+                    <h3 id="display-stu-name" class="font-bangers text-3xl text-slate-800 uppercase tracking-wider">NAMA</h3>
+                </div>
+            </div>
+
+            <div id="pass-section" class="w-full animate-popIn">
+                <div id="status-wait" class="mb-8 flex flex-col items-center">
+                    <div class="w-16 h-16 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+                    <h2 class="font-bangers text-3xl text-slate-600 uppercase tracking-wider">Menunggu Arahan Guru...</h2>
+                </div>
+                
+                <div class="content-box p-8 w-full mb-8">
+                    <p class="text-sm font-black text-slate-500 mb-4 uppercase tracking-widest">Kata Laluan Slaid</p>
+                    <input type="text" id="stu-pass" maxlength="10" placeholder="Cth: ABCDEFG" oninput="checkPassInput()" class="w-full h-24 text-center text-4xl md:text-5xl font-bangers uppercase border-2 border-slate-800 rounded-xl focus:border-emerald-500 focus:outline-none bg-slate-50 text-emerald-700 tracking-widest">
+                    <p class="text-xs font-bold text-slate-400 mt-4 uppercase"><i class="fas fa-sync animate-spin"></i> Sistem Auto-Sync Diaktifkan</p>
+                </div>
+            </div>
+
+            <!-- BUTANG BUZZER 3D -->
+            <div id="buzzer-section" class="hidden w-full flex-col items-center animate-popIn">
+                <p class="font-bangers text-emerald-600 text-4xl mb-6 animate-pulse uppercase tracking-widest">Butang Diaktifkan!</p>
+                
+                <div class="buzzer-container">
+                    <button id="main-buzzer" onclick="hitBuzzer()" class="real-buzzer-btn">
+                        <span id="buzzer-main-text" class="font-bangers text-6xl tracking-widest">BUZZ</span>
+                        <span id="buzzer-label" class="text-sm font-bold uppercase tracking-widest mt-2">Tekan Segera!</span>
+                    </button>
+                </div>
+                <!-- Batal button removed since it's auto-sync now, avoiding user misclicks -->
+                <p class="mt-10 text-slate-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-lock"></i> Sesi disambungkan secara automatik</p>
+            </div>
+
+            <!-- WAITING RESULT SECTION -->
+            <div id="wait-result-section" class="hidden w-full flex-col items-center animate-popIn">
+                <div class="w-20 h-20 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin mb-6"></div>
+                <h2 class="font-bangers text-4xl text-slate-700 uppercase tracking-wider text-center">Menyemak Kelajuan...</h2>
+                <p class="text-slate-500 font-bold mt-2 uppercase tracking-widest text-sm">Sila tunggu sebentar.</p>
+            </div>
+
+            <!-- WINNER: TYPE ANSWER SECTION -->
+            <div id="type-answer-section" class="hidden w-full content-box border-emerald-500 shadow-[6px_6px_0px_#059669] flex-col items-center animate-popIn">
+                <h2 class="font-bangers text-4xl md:text-5xl text-emerald-700 mb-4 uppercase text-center">TAHNIAH!<br>ANDA TERPANTAS</h2>
+                <div class="bg-amber-100 border-2 border-amber-400 p-4 rounded mb-6 w-full text-center">
+                    <p class="text-amber-800 font-bold text-xs uppercase tracking-widest"><i class="fas fa-eye"></i> Sila teliti soalan di skrin utama, kemudian taip jawapan di bawah.</p>
+                </div>
+                <input type="text" id="stu-final-answer" placeholder="Jawapan anda..." class="w-full p-5 border-2 border-slate-800 rounded-lg text-center text-3xl uppercase font-black focus:border-emerald-500 focus:outline-none shadow-inner bg-slate-50 mb-8">
+                <button onclick="submitAnswer()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bangers text-3xl rounded-lg border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b] hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-widest">Hantar Jawapan</button>
+            </div>
+
+            <!-- LOSER SECTION -->
+            <div id="loser-section" class="hidden w-full content-box border-red-500 shadow-[6px_6px_0px_#ef4444] flex-col items-center animate-popIn mt-6 text-center">
+                <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6 border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b]"><i class="fas fa-times text-4xl"></i></div>
+                <h2 class="font-bangers text-4xl md:text-5xl mb-4 text-red-800 uppercase">MAAF, TERLEWAT!</h2>
+                <p class="text-slate-700 font-bold text-lg mb-2">Pemain <span id="fastest-player-name" class="text-blue-600 font-black">NAMA</span> bertindak lebih pantas.</p>
+                <p class="text-slate-500 text-sm font-bold uppercase tracking-widest mb-4 animate-pulse"><i class="fas fa-satellite-dish"></i> Rakan anda sedang menjawab...</p>
+                
+                <p class="text-slate-800 bg-amber-200 border-2 border-amber-400 px-4 py-3 rounded-lg text-sm font-bold uppercase mt-2 shadow-inner">
+                    Sila tunggu giliran seterusnya <br>
+                    <span class="text-xs text-slate-600 tracking-widest">Please wait for the next turn</span>
+                </p>
+
+                <p class="mt-8 text-slate-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-sync animate-spin"></i> Menunggu kemaskini automatik guru...</p>
+            </div>
+
+            <!-- SUCCESS SECTION -->
+            <div id="success-section" class="hidden w-full content-box bg-emerald-50 border-emerald-600 shadow-[6px_6px_0px_#059669] flex-col items-center animate-popIn mt-6 text-center">
+                <div class="w-20 h-20 bg-emerald-600 text-white rounded-full flex items-center justify-center mb-6 border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b]"><i class="fas fa-check text-4xl"></i></div>
+                <h2 class="font-bangers text-5xl mb-4 text-emerald-800 uppercase">Berjaya Dihantar!</h2>
+                <p class="text-slate-700 font-bold text-lg mb-6 text-center">Sila semak ketepatan jawapan di skrin kelas.</p>
+                <p class="mt-6 text-slate-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-sync animate-spin"></i> Menunggu kemaskini automatik guru...</p>
+            </div>
+
+            <!-- ALREADY ANSWERED (LOCKED) SECTION -->
+            <div id="already-answered-section" class="hidden w-full content-box bg-slate-100 border-slate-500 shadow-[6px_6px_0px_#64748b] flex-col items-center animate-popIn mt-6 text-center">
+                <div class="w-20 h-20 bg-slate-300 text-slate-600 rounded-full flex items-center justify-center mb-6 border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b]"><i class="fas fa-lock text-4xl"></i></div>
+                <h2 class="font-bangers text-4xl md:text-5xl mb-4 text-slate-700 uppercase">GILIRAN DITAMATKAN</h2>
+                <p class="text-slate-600 font-bold text-sm mb-6 text-center">Anda telah memberi jawapan yang kurang tepat. Berikan peluang kepada rakan lain untuk sesi lantunan semula (Rebound).</p>
+                <p class="mt-6 text-slate-400 font-bold text-xs uppercase tracking-widest"><i class="fas fa-sync animate-spin"></i> Menunggu soalan baharu dari guru...</p>
+            </div>
+
+            <!-- VIP SECTION (CHEAT SHEET Khas Guru) -->
+            <div id="vip-section" class="hidden w-full content-box bg-slate-900 border-amber-500 shadow-[6px_6px_0px_#f59e0b] flex-col items-center animate-popIn text-left">
+                <div class="w-full flex justify-between items-center mb-6 border-b-2 border-slate-700 pb-4">
+                    <h2 class="font-bangers text-3xl md:text-4xl text-amber-400 uppercase tracking-widest"><i class="fas fa-crown text-amber-500"></i> Akses VIP</h2>
+                    <button onclick="exitVIP()" class="text-slate-400 hover:text-red-400 font-bold transition-colors" title="Keluar VIP"><i class="fas fa-times text-2xl"></i></button>
+                </div>
+                
+                <div class="w-full mb-8">
+                    <h3 class="font-bangers text-2xl text-emerald-400 mb-3 uppercase tracking-widest">Slaid 11: Terjemahan</h3>
+                    <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-slate-200">
+                        <p class="font-bold text-base mb-3">"My mother is cooking in the evening."</p>
+                        <p class="text-xs text-slate-400 uppercase tracking-widest mb-2">Kata Kunci Diterima (Termasuk Sinonim):</p>
+                        <ul class="list-disc ml-5 text-emerald-300 font-bold text-sm space-y-1">
+                            <li>Subjek: IBU, EMAK, MAMA, BONDA, UMMI, MA</li>
+                            <li>Kata Kerja: MASAK, MEMASAK, MENYEDIAKAN</li>
+                            <li>Masa: PETANG, SENJA</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="w-full">
+                    <h3 class="font-bangers text-2xl text-blue-400 mb-3 uppercase tracking-widest">Slaid 15: Cabaran Kosa Kata</h3>
+                    <div id="vip-feud-list" class="space-y-4 max-h-[50vh] overflow-y-auto pr-3 pb-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= 3. ANTARAMUKA GURU (PRESENTASI) ================= -->
+    <div id="teacher-view" class="hidden h-full w-full relative">
+        
+        <!-- Tetapan & Navigasi Guru -->
+        <div id="floating-controls" class="fixed bottom-6 left-6 right-6 flex justify-between items-end z-50 pointer-events-none hidden">
+            
+            <div class="flex flex-col gap-3 pointer-events-auto">
+                <div id="slideCounter" class="bg-white text-slate-800 px-5 py-2 rounded-xl font-bold text-lg border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b] w-max">01 / 15</div>
+                <div id="api-status" class="flex items-center gap-3 bg-white px-5 py-2.5 rounded-xl border-2 border-slate-800 font-bold text-xs text-slate-600 uppercase shadow-[4px_4px_0px_#1e293b] w-max">
+                    <span class="w-3 h-3 rounded-full bg-slate-400" id="api-dot"></span> <span id="api-text">Mod Siap Sedia</span>
+                </div>
+            </div>
+
+            <div class="flex gap-4 pointer-events-auto">
+                <button onclick="changeSlide(-1)" id="btnPrev" class="w-16 h-16 bg-white border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b] rounded-full text-2xl hover:bg-slate-100 flex items-center justify-center text-slate-800 transition-transform hover:-translate-y-1"><i class="fas fa-arrow-left"></i></button>
+                <button onclick="changeSlide(1)" id="btnNext" class="h-16 px-8 bg-blue-600 text-white font-bangers text-3xl uppercase tracking-widest border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b] rounded-full hover:bg-blue-500 flex items-center justify-center transition-transform hover:-translate-y-1">Seterusnya <i class="fas fa-arrow-right ml-3"></i></button>
+                <button onclick="toggleFullscreen()" class="w-16 h-16 bg-white border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b] rounded-full text-2xl hover:bg-slate-100 flex items-center justify-center text-slate-800 transition-transform hover:-translate-y-1"><i class="fas fa-expand-alt"></i></button>
+            </div>
+        </div>
+
+        <!-- SLIDE 1: HERO -->
+        <div class="slide active items-center justify-center text-center" id="slide-1">
+            <div class="max-w-6xl space-y-8 z-10">
+                <h1 class="font-bangers text-[8rem] md:text-[10rem] leading-none uppercase text-slate-800 drop-shadow-lg">
+                    Sesi <span class="text-emerald-600">Ulang Kaji</span>
+                </h1>
+                <p class="text-3xl font-bold bg-amber-200 border-4 border-slate-800 inline-block px-8 py-4 transform -rotate-2 shadow-[6px_6px_0px_#1e293b]">
+                    Fokus Utama: Pengenalan Diri, Masa & Keluarga
+                </p>
+                <div class="pt-10">
+                    <button onclick="changeSlide(1)" class="btn-nav text-3xl px-12 py-5 font-bangers uppercase shadow-[6px_6px_0px_#1e293b]">Mula Belajar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: QR CODE -->
+        <div class="slide items-center justify-center text-center" id="slide-2">
+            <div class="content-box max-w-3xl w-full mx-auto">
+                <div class="inline-flex items-center gap-3 px-5 py-2 bg-blue-600 text-white rounded font-bold uppercase tracking-widest mb-8 border-2 border-slate-800 shadow-[4px_4px_0px_#1e293b] text-base">
+                    <i class="fas fa-link"></i> Penyambungan Peranti Pintar
+                </div>
+                <h2 class="font-bangers text-6xl text-slate-800 mb-6 uppercase">Sediakan Peranti Anda</h2>
+                <p class="text-2xl text-slate-600 mb-6 font-bold">Pilih <span class="bg-slate-200 px-3 py-1 rounded border-2 border-slate-800 text-slate-800">Mod Pelajar</span> di telefon pintar masing-masing.</p>
+                
+                <div class="mb-6 flex flex-col items-center bg-slate-50 p-4 border-2 border-slate-200 rounded-xl">
+                    <label class="text-sm font-black text-blue-600 mb-3 uppercase tracking-widest"><i class="fas fa-edit"></i> Guru: Sila sahkan pautan (URL) kelas</label>
+                    <input type="text" id="teacher-url-input" value="https://shahrizanwahib-dot.github.io/buzzertest/" oninput="updateQRCode()" class="w-full max-w-lg p-3 border-2 border-slate-800 rounded-lg text-center text-xl font-bold text-slate-700 focus:border-blue-600 outline-none">
+                </div>
+
+                <div class="bg-white p-6 border-4 border-slate-800 shadow-[8px_8px_0px_#1e293b] inline-block mb-4">
+                    <img id="join-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fshahrizanwahib-dot.github.io%2Fbuzzertest%2F" class="w-56 h-56 mx-auto" alt="Sila tunggu...">
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: OBJEKTIF -->
+        <div class="slide items-center justify-center" id="slide-3">
+            <div class="content-box max-w-5xl w-full">
+                <h2 class="font-bangers text-6xl mb-10 uppercase text-center border-b-4 border-slate-800 pb-4">Misi Ulang Kaji Kita</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-2xl font-bold text-slate-700">
+                    <div class="flex flex-col items-center text-center gap-4 bg-slate-50 p-8 border-2 border-slate-200 rounded-xl">
+                        <i class="fas fa-user-circle text-6xl text-blue-600 mb-2"></i> Pengenalan Diri & Ucapan
+                    </div>
+                    <div class="flex flex-col items-center text-center gap-4 bg-slate-50 p-8 border-2 border-slate-200 rounded-xl">
+                        <i class="fas fa-clock text-6xl text-emerald-600 mb-2"></i> Masa & Waktu
+                    </div>
+                    <div class="flex flex-col items-center text-center gap-4 bg-slate-50 p-8 border-2 border-slate-200 rounded-xl">
+                        <i class="fas fa-paw text-6xl text-amber-600 mb-2"></i> Keluarga & Haiwan
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: TOPIK 1 -->
+        <div class="slide items-center justify-center" id="slide-4">
+            <div class="content-box max-w-6xl w-full">
+                <div class="inline-block bg-blue-600 text-white font-bangers text-2xl px-6 py-2 rounded-full mb-6">Modul 1</div>
+                <h2 class="font-bangers text-6xl uppercase mb-8"><i class="fas fa-user-circle text-blue-600"></i> Pengenalan Diri & Ucapan</h2>
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="bg-slate-50 p-8 border-2 border-slate-800 rounded-2xl">
+                        <h3 class="font-bangers text-3xl text-slate-700 mb-4 border-b-2 border-slate-300 pb-3">Kosa Kata Asas</h3>
+                        <ul class="space-y-4 text-2xl font-bold text-slate-600">
+                            <li><span class="text-blue-600">Selamat pagi</span> = Good morning</li>
+                            <li><span class="text-blue-600">Apa khabar?</span> = How are you?</li>
+                            <li><span class="text-blue-600">Khabar baik</span> = I am fine</li>
+                            <li><span class="text-blue-600">Terima kasih</span> = Thank you</li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-50 p-8 border-2 border-slate-800 rounded-2xl shadow-[6px_6px_0px_#1e3a8a]">
+                        <h3 class="font-bangers text-3xl text-slate-700 mb-4 border-b-2 border-slate-300 pb-3">Struktur Ayat</h3>
+                        <p class="text-2xl font-bold mb-4">"Nama saya Adam. Saya berasal dari Malaysia."</p>
+                        <p class="text-2xl font-bold">"Saya tinggal di kawasan bandar yang sibuk."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: CFU 1 -->
+        <div class="slide items-center justify-center text-center" id="slide-5">
+            <div class="content-box max-w-4xl w-full">
+                <h2 class="font-bangers text-5xl text-amber-600 uppercase mb-8">Semakan Kefahaman (CFU)</h2>
+                <div class="bg-slate-100 p-8 rounded-xl border-2 border-slate-300 mb-8">
+                    <p class="text-3xl font-bold text-slate-800">Situasi: Rakan anda bertanya, "Apa khabar, Ali?"</p>
+                </div>
+                <p class="text-2xl mb-6 font-bold text-slate-600 uppercase">Apakah respons yang paling sesuai?</p>
+                <div class="flex flex-col gap-4 max-w-2xl mx-auto">
+                    <button onclick="checkCFU(this, true, 'cfu-1')" class="cfu-btn px-6 py-4 bg-white border-2 border-slate-800 text-2xl font-bold hover:bg-emerald-100 shadow-[4px_4px_0px_#1e293b] rounded-xl">"Khabar baik, terima kasih."</button>
+                    <button onclick="checkCFU(this, false)" class="cfu-btn px-6 py-4 bg-white border-2 border-slate-800 text-2xl font-bold hover:bg-red-100 shadow-[4px_4px_0px_#1e293b] rounded-xl">"Nama saya Ali."</button>
+                </div>
+                <div id="cfu-1" class="mt-8 text-3xl font-bold hidden text-emerald-600">Tepat Sekali!</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: TOPIK 2 -->
+        <div class="slide items-center justify-center" id="slide-6">
+            <div class="content-box max-w-6xl w-full">
+                <div class="inline-block bg-emerald-600 text-white font-bangers text-2xl px-6 py-2 rounded-full mb-6">Modul 2</div>
+                <h2 class="font-bangers text-6xl uppercase mb-8"><i class="fas fa-clock text-emerald-600"></i> Masa & Waktu</h2>
+                <div class="grid grid-cols-2 gap-8 items-center">
+                    <div class="bg-emerald-50 p-8 border-2 border-slate-800 rounded-2xl shadow-[6px_6px_0px_#065f46]">
+                        <ul class="space-y-5 text-2xl font-bold text-slate-700">
+                            <li><i class="fas fa-sun text-amber-500 w-8"></i> <strong>Pagi</strong> (Morning)</li>
+                            <li><i class="fas fa-cloud-sun text-orange-500 w-8"></i> <strong>Tengah hari</strong> (Afternoon / Noon)</li>
+                            <li><i class="fas fa-sunset text-red-500 w-8"></i> <strong>Petang</strong> (Evening)</li>
+                            <li><i class="fas fa-moon text-indigo-500 w-8"></i> <strong>Malam</strong> (Night)</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-50 p-8 border-2 border-slate-800 rounded-2xl">
+                        <h3 class="font-bangers text-3xl text-slate-700 mb-5">Cara Sebut Masa</h3>
+                        <p class="text-2xl font-bold mb-3">08:00 = Pukul lapan</p>
+                        <p class="text-2xl font-bold mb-3">08:15 = Pukul lapan <span class="text-emerald-600">suku</span></p>
+                        <p class="text-2xl font-bold mb-3">08:30 = Pukul lapan <span class="text-emerald-600">setengah</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: CFU 2 -->
+        <div class="slide items-center justify-center text-center" id="slide-7">
+            <div class="content-box max-w-4xl w-full">
+                <h2 class="font-bangers text-5xl text-amber-600 uppercase mb-8">Semakan Kefahaman (CFU)</h2>
+                <div class="bg-slate-100 p-8 rounded-xl border-2 border-slate-300 mb-8">
+                    <p class="text-7xl font-bangers text-slate-800 tracking-widest">02:30 PM</p>
+                </div>
+                <p class="text-2xl mb-6 font-bold text-slate-600 uppercase">Bagaimanakah waktu ini disebut dalam bahasa Melayu?</p>
+                <div class="flex flex-col gap-4 max-w-2xl mx-auto">
+                    <button onclick="checkCFU(this, false)" class="cfu-btn px-6 py-4 bg-white border-2 border-slate-800 text-2xl font-bold hover:bg-red-100 shadow-[4px_4px_0px_#1e293b] rounded-xl">Pukul dua tiga puluh pagi</button>
+                    <button onclick="checkCFU(this, true, 'cfu-2')" class="cfu-btn px-6 py-4 bg-white border-2 border-slate-800 text-2xl font-bold hover:bg-emerald-100 shadow-[4px_4px_0px_#1e293b] rounded-xl">Pukul dua setengah petang</button>
+                </div>
+                <div id="cfu-2" class="mt-8 text-3xl font-bold hidden text-emerald-600">Tepat Sekali!</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: TOPIK 3 -->
+        <div class="slide items-center justify-center" id="slide-8">
+            <div class="content-box max-w-6xl w-full">
+                <div class="inline-block bg-amber-600 text-white font-bangers text-2xl px-6 py-2 rounded-full mb-6">Modul 3</div>
+                <h2 class="font-bangers text-6xl uppercase mb-8"><i class="fas fa-paw text-amber-600"></i> Keluarga & Haiwan Peliharaan</h2>
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="bg-slate-50 p-8 border-2 border-slate-800 rounded-2xl">
+                        <h3 class="font-bangers text-3xl text-slate-700 mb-5 border-b-2 border-slate-300 pb-3">Ahli Keluarga (Family)</h3>
+                        <div class="grid grid-cols-2 gap-5 text-2xl font-bold text-slate-600">
+                            <div><i class="fas fa-male text-blue-500 w-6"></i> Bapa</div>
+                            <div><i class="fas fa-female text-pink-500 w-6"></i> Ibu</div>
+                            <div><i class="fas fa-user text-blue-400 w-6"></i> Abang / Adik</div>
+                            <div><i class="fas fa-user text-pink-400 w-6"></i> Kakak / Adik</div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 p-8 border-2 border-slate-800 rounded-2xl shadow-[6px_6px_0px_#b45309]">
+                        <h3 class="font-bangers text-3xl text-slate-700 mb-5">Haiwan (Pets)</h3>
+                        <ul class="space-y-4 text-2xl font-bold text-slate-700">
+                            <li><i class="fas fa-cat w-8"></i> Kucing (Cat)</li>
+                            <li><i class="fas fa-dog w-8"></i> Anjing (Dog)</li>
+                            <li><i class="fas fa-fish w-8"></i> Ikan (Fish)</li>
+                            <li><i class="fas fa-dove w-8"></i> Burung (Bird)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: CFU 3 -->
+        <div class="slide items-center justify-center text-center" id="slide-9">
+            <div class="content-box max-w-4xl w-full">
+                <h2 class="font-bangers text-5xl text-amber-600 uppercase mb-8">Lengkapkan Ayat</h2>
+                <div class="bg-slate-100 p-8 rounded-xl border-2 border-slate-300 mb-8">
+                    <p class="text-3xl font-bold text-slate-800 leading-relaxed">"Keluarga saya membela seekor ____________ yang sangat comel dan gemar memakan ikan pada waktu petang."</p>
+                </div>
+                <div class="flex flex-col gap-4 max-w-2xl mx-auto">
+                    <button onclick="checkCFU(this, true, 'cfu-3')" class="cfu-btn px-6 py-4 bg-white border-2 border-slate-800 text-2xl font-bold hover:bg-emerald-100 shadow-[4px_4px_0px_#1e293b] rounded-xl">Kucing</button>
+                    <button onclick="checkCFU(this, false)" class="cfu-btn px-6 py-4 bg-white border-2 border-slate-800 text-2xl font-bold hover:bg-red-100 shadow-[4px_4px_0px_#1e293b] rounded-xl">Burung</button>
+                </div>
+                <div id="cfu-3" class="mt-8 text-3xl font-bold hidden text-emerald-600">Tepat Sekali! Kucing menggemari ikan.</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: KUNCI BUZZER (PREP) -->
+        <div class="slide items-center justify-center text-center" id="slide-10">
+            <div class="content-box max-w-4xl w-full border-4 border-slate-800 shadow-[8px_8px_0px_#1e293b]">
+                <div class="inline-flex items-center gap-3 px-6 py-2 bg-slate-900 text-white rounded font-bold uppercase tracking-widest mb-8 text-sm">
+                    <i class="fas fa-lock text-amber-400"></i> Persediaan Ujian Kepantasan
+                </div>
+                <h2 class="font-bangers text-7xl text-slate-900 mb-6 uppercase">Bersedia Untuk Berebut!</h2>
+                <p class="text-2xl font-bold text-slate-600 mb-8">Sila pastikan kod rawak ini dimasukkan ke dalam peranti anda. <br><span class="text-base text-blue-600">(Pelajar hanya perlu masukkan kod ini SEKALI sahaja untuk keseluruhan sesi)</span></p>
+                
+                <!-- Kotak Password -->
+                <div id="pass-container-10" class="bg-amber-300 p-8 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0px_rgba(0,0,0,0.2)] inline-block mb-10 transform -rotate-2 transition-all">
+                    <span id="prep-pass-11" class="text-[5rem] md:text-[6rem] font-bangers text-slate-900 leading-none drop-shadow-md tracking-widest">ABCDEFG</span>
+                </div>
+                
+                <!-- Kotak Nama Pemenang -->
+                <div id="winner-container-10" class="hidden bg-emerald-400 p-8 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0px_rgba(0,0,0,0.2)] mb-10 transform rotate-2 flex-col items-center animate-popIn">
+                    <p class="text-slate-900 font-black uppercase tracking-widest text-xl mb-2"><i class="fas fa-bolt"></i> Terpantas!</p>
+                    <span id="winner-name-10" class="text-[5rem] md:text-[6rem] font-bangers text-slate-900 leading-none drop-shadow-md tracking-widest uppercase">NAMA</span>
+                    <p class="text-slate-800 font-bold mt-3 bg-white/50 px-4 py-2 rounded border border-slate-900 uppercase tracking-widest text-sm">Perhatian: Sila ke slaid yang seterusnya</p>
+                </div>
+
+                <div class="p-6 bg-red-50 border-2 border-red-600 rounded-xl max-w-2xl mx-auto text-left flex gap-4">
+                    <i class="fas fa-exclamation-triangle text-4xl text-red-600 mt-1"></i>
+                    <div>
+                        <p class="text-red-700 font-black uppercase text-xl mb-2">Arahan Pelaksanaan Auto-Sync</p>
+                        <p class="text-red-800 font-bold text-lg">Taip *kata laluan* dan bersedia di atas butang pemikir. Untuk soalan seterusnya, sistem akan <span class="underline">mengemaskini peranti pelajar secara automatik</span> tanpa perlu menaip kod baharu!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: SOALAN BUZZER -->
+        <div class="slide items-center justify-center relative" id="slide-11">
+            <!-- Papan Kunci Aktif (Fixed Positon) -->
+            <div id="active-pass-banner-11" class="absolute top-8 right-8 bg-slate-900 text-amber-400 px-6 py-2 rounded-xl font-bangers text-3xl tracking-widest border-2 border-slate-700 shadow-[0_6px_0_#0f172a] z-50 transition-opacity duration-300">
+                KOD: <span id="current-pass-11">ABCDEFG</span>
+            </div>
+
+            <div class="content-box max-w-5xl w-full border-2 border-blue-600 shadow-[8px_8px_0px_#2563eb] text-center mt-12">
+                <div class="inline-block px-6 py-2 bg-blue-600 text-white rounded-full font-black uppercase tracking-[0.2em] mb-8 text-base">Ujian Terjemahan Pantas</div>
+                
+                <h2 class="font-bangers text-5xl md:text-6xl mb-8 text-slate-900 leading-tight">
+                    Terjemahkan ayat ini ke dalam bahasa Melayu: <br><br>
+                    <span class="text-amber-600 bg-amber-50 px-6 py-3 border-4 border-amber-600 rounded-xl inline-block mt-4">"My mother is cooking in the evening."</span>
+                </h2>
+                
+                <!-- Status Pemenang Menjawab -->
+                <div id="winner-ui-11" class="hidden flex-col items-center w-full mt-6 animate-popIn">
+                    <div class="text-center bg-slate-50 px-10 py-8 rounded-2xl border-4 border-emerald-600 w-full max-w-3xl shadow-[8px_8px_0px_#059669] mx-auto relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-emerald-500 animate-pulse"></div>
+                        <p class="text-sm font-black text-emerald-700 uppercase tracking-widest mb-2"><i class="fas fa-user-edit"></i> Pemain Menjawab</p>
+                        <h2 id="winner-name-11" class="font-bangers text-[4rem] text-slate-900 uppercase leading-none truncate mb-6">NAMA</h2>
+                        
+                        <div id="typing-status-11" class="text-2xl font-bold text-slate-600 bg-white p-4 rounded-xl border-2 border-slate-300 flex flex-col items-center">
+                            <div><i class="fas fa-keyboard text-amber-500 animate-pulse"></i> Menunggu jawapan dihantar...</div>
+                        </div>
+                        
+                        <!-- BUTANG KICK Khas Guru (Slaid 11) -->
+                        <button onclick="kickWinner(11)" class="mt-6 pointer-events-auto inline-flex items-center gap-2 bg-red-100 text-red-700 px-5 py-2.5 rounded-lg font-bold hover:bg-red-200 hover:text-red-900 border-2 border-red-300 text-sm transition-all shadow-sm">
+                            <i class="fas fa-trash-alt"></i> Batal & Lantun Semula
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: PENULISAN PENDEK -->
+        <div class="slide items-center justify-center" id="slide-12">
+            <div class="content-box max-w-5xl w-full text-center">
+                <h2 class="font-bangers text-7xl uppercase mb-8 text-emerald-700">Latihan Penulisan</h2>
+                <p class="text-3xl font-bold mb-8">Bina satu ayat yang menceritakan aktiviti harian keluarga anda.</p>
+                <div class="bg-slate-100 p-8 border-l-8 border-emerald-600 text-left text-2xl font-bold space-y-4 rounded-r-xl">
+                    <p class="text-slate-800">Syarat penulisan:</p>
+                    <p class="text-slate-600">✓ Mesti mengandungi unsur MASA (Contoh: Pada waktu petang).</p>
+                    <p class="text-slate-600">✓ Mesti melibatkan AHLI KELUARGA (Contoh: Bapa / Ibu).</p>
+                    <p class="text-slate-600">✓ Menggunakan kata hubung "DAN".</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: REFLEKSI -->
+        <div class="slide items-center justify-center" id="slide-13">
+            <div class="content-box max-w-6xl w-full text-center">
+                <h2 class="font-bangers text-7xl uppercase mb-10">Sesi Refleksi</h2>
+                <div class="grid grid-cols-2 gap-8 text-left">
+                    <div class="p-8 border-2 border-slate-300 rounded-2xl">
+                        <p class="text-2xl font-bangers text-slate-400 mb-4 tracking-wider">Dahulu saya berfikir...</p>
+                        <p class="text-2xl font-bold text-slate-700 leading-relaxed">Agak sukar untuk mengingati kosa kata asas berkaitan keluarga dan masa.</p>
+                    </div>
+                    <div class="p-8 border-4 border-emerald-600 bg-emerald-50 shadow-[6px_6px_0px_#059669] rounded-2xl">
+                        <p class="text-2xl font-bangers text-emerald-700 mb-4 tracking-wider">Kini saya mengetahui...</p>
+                        <p class="text-2xl font-bold text-slate-800 leading-relaxed">Saya mampu mengaplikasikan kosa kata ini untuk membina ayat mudah tentang rutin kehidupan harian.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: EXIT TICKET -->
+        <div class="slide items-center justify-center" id="slide-14">
+            <div class="content-box max-w-4xl w-full text-center">
+                <h2 class="font-bangers text-7xl uppercase mb-8 text-blue-700 underline">Tiket Keluar</h2>
+                <p class="text-3xl font-bold mb-8 text-slate-800">Berikan satu ucapan selamat yang paling sesuai dilafazkan pada pukul 9.00 malam.</p>
+                <textarea class="w-full h-32 border-2 border-slate-800 p-5 text-2xl font-bold outline-none rounded-xl" placeholder="Jawapan anda di sini..."></textarea>
+                <button onclick="changeSlide(1)" class="btn-nav text-2xl px-10 py-4 font-bangers uppercase mt-6 rounded-xl">Selesai</button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SLIDE 15: CABARAN KOSA KATA (FAMILY FEUD)  -->
+        <!-- ========================================== -->
+        <div class="slide items-center justify-center bg-slate-900 relative" id="slide-15">
+            <!-- Papan Kunci Aktif (Fixed Positon) -->
+            <div id="active-pass-banner-15" class="absolute top-8 right-8 bg-slate-800 border-2 border-emerald-400 text-emerald-400 px-5 py-2 rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,0.5)] z-50 transition-opacity duration-300">
+                <span class="font-bold uppercase tracking-widest text-xs">KOD: </span>
+                <span id="prep-pass-15" class="font-bangers text-3xl tracking-widest ml-1">ABCDEFG</span>
+            </div>
+
+            <div class="w-full max-w-6xl flex flex-col items-center">
+                <div class="mb-6 text-center animate-popIn">
+                    <h1 class="font-bangers text-[5rem] md:text-[6rem] text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] leading-none uppercase tracking-widest">
+                        Cabaran Kosa Kata
+                    </h1>
+                    <p class="text-xl font-bold text-slate-300 uppercase tracking-[0.2em] mt-3 border-b-2 border-slate-600 pb-2 inline-block">Ujian Ingatan Melalui Pengesanan Automatik</p>
+                </div>
+
+                <div class="w-full flex justify-between items-center mb-6 px-4">
+                    <div class="bg-blue-900 text-white p-6 border-4 border-yellow-400 rounded-2xl shadow-[0_0_20px_rgba(37,99,235,0.5)] flex-1 text-center mr-8">
+                        <h2 id="feud-question" class="text-3xl font-bold leading-tight">Soalan akan dipaparkan di ruangan ini...</h2>
+                    </div>
+                    
+                    <div class="bg-slate-800 border-4 border-slate-600 rounded-2xl p-4 flex flex-col items-center w-40 shrink-0 shadow-lg">
+                        <p class="text-slate-400 font-bold uppercase text-xs mb-2 tracking-widest">Markah Terkumpul</p>
+                        <p id="feud-total-score" class="font-bangers text-5xl text-yellow-400">0</p>
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-col items-center justify-center relative mb-6">
+                    <div id="feud-winner-display" class="hidden w-full max-w-2xl bg-slate-100 border-4 border-emerald-500 rounded-xl p-4 text-center animate-popIn z-10 shadow-[6px_6px_0px_#059669]">
+                        <p class="text-emerald-700 font-bold uppercase tracking-widest text-sm mb-2"><i class="fas fa-bolt"></i> Jawapan Daripada:</p>
+                        <h3 id="feud-winner-name" class="font-bangers text-4xl text-slate-900 uppercase">NAMA</h3>
+                        <div class="bg-white border-2 border-slate-300 rounded-lg p-3 mt-3 flex flex-col items-center">
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mb-1">Status Jawapan:</p>
+                            <p id="feud-winner-ans" class="font-bangers text-3xl text-emerald-600 tracking-wider">SEDANG MENAIP...</p>
+                            
+                            <!-- BUTANG KICK Khas Guru (Slaid 15) -->
+                            <button onclick="kickWinner(15)" class="mt-4 pointer-events-auto inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-1.5 rounded-lg font-bold hover:bg-red-200 hover:text-red-900 border border-red-300 text-xs transition-all shadow-sm">
+                                <i class="fas fa-ban"></i> Batal Pemain Ini
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feud-board w-full grid grid-cols-2 gap-4 mb-6" id="feud-board-container">
+                </div>
+
+                <div class="w-full flex justify-between items-center bg-slate-800 p-4 rounded-xl border-2 border-slate-700 shadow-lg">
+                    <div class="flex gap-4">
+                        <button onclick="prevFeud()" class="btn-nav bg-slate-700 border-slate-600 text-xl font-bangers w-12 h-12 flex items-center justify-center rounded-lg hover:bg-slate-600"><i class="fas fa-chevron-left"></i></button>
+                        <div id="feud-counter" class="bg-slate-900 text-slate-300 font-bangers text-2xl px-5 py-2 rounded-lg border border-slate-700 flex items-center">S1 / 10</div>
+                        <button onclick="nextFeud()" class="btn-nav bg-blue-600 border-blue-800 text-xl font-bangers hover:bg-blue-500 rounded-lg flex items-center px-6">Peralihan Soalan <i class="fas fa-chevron-right ml-2"></i></button>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <div id="strike-display" class="flex gap-4 font-bangers text-5xl tracking-widest min-w-[120px] justify-center text-slate-700">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Modal Salah / Rebound Automatik -->
+        <div id="wrong-modal" class="absolute inset-0 z-[100] hidden flex-col items-center justify-center bg-slate-950/95 backdrop-blur-xl p-4">
+            <div class="text-center mb-6 animate-popIn text-white">
+                <h2 class="font-bangers text-[7rem] md:text-[8rem] tracking-tighter uppercase text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] leading-none">TIDAK TEPAT!</h2>
+                <p class="text-slate-300 font-bold uppercase tracking-widest mt-4 text-xl bg-red-900/50 px-6 py-2 rounded-full border border-red-500/50 inline-block">Sistem dibuka semula secara automatik dalam 1.5 saat...</p>
+            </div>
+            <div class="relative w-full max-w-3xl aspect-video bg-black rounded-2xl border-4 border-white/10 shadow-2xl overflow-hidden animate-popIn" style="animation-delay: 0.1s;">
+                <img src="https://media.giphy.com/media/xT5LMPj8P20jjOqZ5C/giphy.gif" class="w-full h-full object-cover" alt="GIF Jawapan Salah">
+            </div>
+            <div class="mt-8 flex flex-col items-center animate-popIn" style="animation-delay: 0.2s;">
+                <div class="w-12 h-12 border-4 border-slate-700 border-t-red-500 rounded-full animate-spin mb-4"></div>
+                <p class="text-red-500 font-black tracking-widest uppercase text-sm animate-pulse">Lantunan Semula Automatik...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Pemasangan Firebase Firestore (Auto-Sync & Kick Feature) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.currentSlide = 1;
+        window.totalSlides = 15;
+        window.myStudentName = "";
+        window.currentStudentPass = "";
+        window.isBuzzing = false;
+        window.hasBuzzed = false; 
+        window.passNormal = "";
+        window.passFeud = "";
+        window.feudAnswerRevealed = false;
+        
+        let auth, db, appId, currentUser;
+        let unsubscribeTeacher = null;
+        let unsubscribeStudent = null;
+
+        // FUNGSI MODAL SALAH & REBOUND AUTOMATIK
+        window.showWrongModalAndRebound = function(slideIndex) {
+            const modal = document.getElementById('wrong-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                if (window.currentSlide === slideIndex) {
+                    window.triggerRobustRebound(slideIndex);
+                }
+            }, 1500); 
+        };
+
+        try {
+            const firebaseConfig = {
+              apiKey: "AIzaSyAQnh77DjiQEiCbzBXKe182zbyIQL2S2to",
+              authDomain: "buzzer-mega-kaji.firebaseapp.com",
+              projectId: "buzzer-mega-kaji",
+              storageBucket: "buzzer-mega-kaji.firebasestorage.app",
+              messagingSenderId: "454192859607",
+              appId: "1:454192859607:web:39104283576e1a376ea392"
+            };
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'kaji-persekitaran-live';
+
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        try {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } catch (tokenError) {
+                            await signInAnonymously(auth);
+                        }
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (authError) {
+                    console.error("Proses pengesahan gagal:", authError);
+                }
+            };
+            initAuth();
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                if(user) {
+                    let apiText = document.getElementById('api-text');
+                    let apiDot = document.getElementById('api-dot');
+                    if(apiText) {
+                        apiText.innerText = "SIARAN LANGSUNG";
+                        apiDot.className = "w-3 h-3 rounded-full bg-green-500 animate-pulse";
+                    }
+                }
+            });
+        } catch (e) {
+            console.error("Gagal berhubung ke pangkalan data:", e);
+        }
+
+        function generateRandomPass(length = 7) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        window.updateQRCode = function() {
+            let url = document.getElementById('teacher-url-input').value.trim();
+            if (!url) {
+                url = "https://shahrizanwahib-dot.github.io/buzzertest/";
+            } else if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            const qrImg = document.getElementById('join-qr');
+            if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
+        }
+
+        window.addEventListener('load', () => { window.updateQRCode(); });
+
+        window.selectRole = function(role) {
+            if (role === 'guru') {
+                document.getElementById('teacher-auth-modal').classList.remove('hidden');
+                document.getElementById('teacher-auth-modal').classList.add('flex');
+                document.getElementById('teacher-pass-input').focus();
+            } else {
+                document.getElementById('role-screen').style.display = 'none';
+                document.getElementById('student-view').style.display = 'flex';
+            }
+        }
+
+        window.cancelTeacherAuth = function() {
+            document.getElementById('teacher-auth-modal').classList.add('hidden');
+            document.getElementById('teacher-auth-modal').classList.remove('flex');
+            document.getElementById('teacher-pass-input').value = '';
+            document.getElementById('teacher-auth-error').classList.add('hidden');
+        }
+
+        window.verifyTeacherAuth = function() {
+            const pass = document.getElementById('teacher-pass-input').value;
+            if (pass === '0506') {
+                document.getElementById('teacher-auth-modal').classList.add('hidden');
+                document.getElementById('teacher-auth-modal').classList.remove('flex');
+                document.getElementById('role-screen').style.display = 'none';
+                document.getElementById('teacher-view').style.display = 'block';
+                document.getElementById('floating-controls').classList.remove('hidden');
+                initTeacher();
+            } else {
+                document.getElementById('teacher-auth-error').classList.remove('hidden');
+                document.getElementById('teacher-pass-input').value = '';
+                document.getElementById('teacher-pass-input').focus();
+            }
+        }
+
+        document.getElementById('teacher-pass-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') verifyTeacherAuth();
+        });
+
+        function setStudentUI(activeId) {
+            const sections = ['status-wait', 'buzzer-section', 'wait-result-section', 'type-answer-section', 'loser-section', 'success-section', 'already-answered-section', 'vip-section'];
+            
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === activeId) {
+                        el.classList.remove('hidden');
+                        if (id !== 'status-wait' && id !== 'vip-section') el.classList.add('flex');
+                        if (id === 'vip-section') el.classList.add('flex');
+                    } else {
+                        el.classList.add('hidden');
+                        el.classList.remove('flex');
+                    }
+                }
+            });
+
+            if (activeId === 'vip-section') {
+                document.getElementById('pass-section').classList.add('hidden');
+                document.getElementById('student-header').classList.add('hidden');
+            } else {
+                document.getElementById('pass-section').classList.remove('hidden');
+                document.getElementById('student-header').classList.remove('hidden');
+                document.getElementById('student-header').classList.add('flex');
+            }
+
+            if (activeId === 'buzzer-section') {
+                const btn = document.getElementById('main-buzzer');
+                btn.classList.remove('pressed', 'locked');
+                window.isBuzzing = false;
+                window.hasBuzzed = false;
+            }
+        }
+
+        window.joinClass = function() {
+            const nameInput = document.getElementById('stu-name').value.trim();
+            if (!nameInput) return;
+            
+            // Ambil perkataan pertama (First Name) sahaja
+            window.myStudentName = nameInput.split(/\s+/)[0].toUpperCase();
+            
+            document.getElementById('display-stu-name').innerText = window.myStudentName;
+            document.getElementById('student-setup').classList.add('hidden');
+            document.getElementById('student-gameplay').classList.remove('hidden');
+            document.getElementById('student-gameplay').classList.add('flex');
+        }
+
+        window.checkPassInput = function() {
+            const pass = document.getElementById('stu-pass').value.trim().toUpperCase();
+            
+            if (pass === '987') {
+                document.getElementById('stu-pass').value = ''; 
+                if (unsubscribeStudent) { unsubscribeStudent(); unsubscribeStudent = null; }
+                window.populateVIP();
+                setStudentUI('vip-section');
+                return;
+            }
+
+            if (pass.length >= 7) { 
+                if (window.currentStudentPass !== pass) {
+                    window.currentStudentPass = pass;
+                    window.hasBuzzed = false; 
+                    setStudentUI('buzzer-section'); 
+                    startStudentListener(pass);
+                }
+            } else {
+                window.currentStudentPass = "";
+                if (unsubscribeStudent) { unsubscribeStudent(); unsubscribeStudent = null; }
+                setStudentUI('status-wait');
+            }
+        }
+
+        function startStudentListener(pass) {
+            if (unsubscribeStudent) { unsubscribeStudent(); unsubscribeStudent = null; }
+            if (!currentUser) return;
+
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'buzzer_sessions', pass);
+            
+            unsubscribeStudent = onSnapshot(docRef, (docSnap) => {
+                if (!docSnap.exists()) {
+                    if (!window.hasBuzzed) setStudentUI('status-wait'); 
+                    return;
+                }
+                
+                const data = docSnap.data();
+
+                // ==========================================
+                // MAGIK AUTO-SYNC TEROWONG
+                // ==========================================
+                // Jika guru buat rebound, dia akan masukkan "nextPass" dalam doc lama.
+                // Pelajar akan tangkap "nextPass" ni, dan automatik tukar bilik!
+                if (data.nextPass && data.nextPass !== window.currentStudentPass) {
+                    document.getElementById('stu-pass').value = data.nextPass;
+                    window.checkPassInput(); // Panggil fungsi checkPass untuk reset UI dan masuk bilik baru
+                    return;
+                }
+
+                const winner = data.winner;
+                const answer = data.answer;
+                const lockedOut = data.lockedOut || [];
+
+                if (lockedOut.includes(window.myStudentName) && winner !== window.myStudentName) {
+                    setStudentUI('already-answered-section');
+                    return;
+                }
+
+                if (winner === "") {
+                    window.isBuzzing = false;
+                    window.hasBuzzed = false;
+                    setStudentUI('buzzer-section'); 
+                } else if (winner === window.myStudentName) {
+                    window.isBuzzing = false;
+                    window.hasBuzzed = true;
+                    if (!answer) {
+                        setStudentUI('type-answer-section');
+                    } else {
+                        setStudentUI('success-section');
+                    }
+                } else {
+                    window.isBuzzing = false;
+                    if (window.hasBuzzed) {
+                        document.getElementById('fastest-player-name').innerText = winner;
+                        setStudentUI('loser-section');
+                    }
+                }
+            }, (error) => console.error(error));
+        }
+
+        window.hitBuzzer = async function() {
+            if (window.isBuzzing || window.hasBuzzed) return; 
+            window.isBuzzing = true;
+            window.hasBuzzed = true;
+
+            const btn = document.getElementById('main-buzzer');
+            btn.classList.add('pressed', 'locked');
+
+            if (!currentUser) {
+                alert("Sistem sedang menghubungi pangkalan awan. Sila tunggu...");
+                window.isBuzzing = false;
+                window.hasBuzzed = false;
+                btn.classList.remove('pressed', 'locked');
+                return;
+            }
+
+            setStudentUI('wait-result-section'); 
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'buzzer_sessions', window.currentStudentPass);
+
+            try {
+                // Transaction: Jaminan pemenang terpantas mutlak (Tiada isu nama berkelip)
+                await runTransaction(db, async (transaction) => {
+                    const sfDoc = await transaction.get(docRef);
+                    if (!sfDoc.exists()) throw "Sesi pangkalan tidak wujud!";
+                    
+                    const currentWinner = sfDoc.data().winner;
+                    if (currentWinner === "") {
+                        transaction.update(docRef, { winner: window.myStudentName });
+                    } else {
+                        throw "Sudah ada pemenang yang lebih pantas!";
+                    }
+                });
+            } catch(e) {
+                console.log("Status Rebutan:", e);
+            }
+        }
+
+        window.submitAnswer = async function() {
+            const ans = document.getElementById('stu-final-answer').value.trim().toUpperCase();
+            if(!ans) return;
+
+            setStudentUI('wait-result-section'); 
+            if (!currentUser) return;
+            
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'buzzer_sessions', window.currentStudentPass);
+            try {
+                await updateDoc(docRef, { answer: ans });
+            } catch(e) {
+                alert("Jawapan gagal dihantar. Sila teliti semula.");
+                setStudentUI('type-answer-section');
+            }
+        }
+
+        window.hardResetBuzzer = function() {
+            window.isBuzzing = false;
+            window.hasBuzzed = false;
+            if (unsubscribeStudent) { unsubscribeStudent(); unsubscribeStudent = null; }
+            document.getElementById('stu-pass').value = '';
+            document.getElementById('stu-final-answer').value = ''; 
+            setStudentUI('status-wait');
+        }
+
+        // --- GURU: LOGIK UI & FIREBASE ---
+        function initTeacher() {
+            window.passNormal = generateRandomPass(7);
+            window.passFeud = generateRandomPass(7);
+            
+            const pass11El = document.getElementById('prep-pass-11');
+            const currentPass11El = document.getElementById('current-pass-11');
+            const pass15El = document.getElementById('prep-pass-15');
+            
+            if(pass11El) pass11El.innerText = window.passNormal;
+            if(currentPass11El) currentPass11El.innerText = window.passNormal;
+            if(pass15El) pass15El.innerText = window.passFeud;
+
+            updateSlide();
+            loadFeudQuestion();
+        }
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            const slide = document.getElementById('slide-' + window.currentSlide);
+            if (slide) slide.classList.add('active');
+            
+            document.getElementById('slideCounter').innerText = (window.currentSlide < 10 ? '0' + window.currentSlide : window.currentSlide) + ' / ' + window.totalSlides;
+
+            if (window.currentSlide === 10) {
+                document.getElementById('pass-container-10').classList.remove('hidden');
+                document.getElementById('pass-container-10').classList.add('inline-block');
+                document.getElementById('winner-container-10').classList.add('hidden');
+                document.getElementById('winner-container-10').classList.remove('flex');
+                startTeacherListener(window.passNormal, 10);
+            } 
+            else if (window.currentSlide === 11) {
+                document.getElementById('winner-ui-11').classList.remove('hidden');
+                document.getElementById('winner-ui-11').classList.add('flex');
+                
+                // Pastikan banner password kelihatan semula bila masuk slaid
+                document.getElementById('active-pass-banner-11').classList.remove('opacity-0');
+                
+                startTeacherListener(window.passNormal, 11);
+            }
+            else if (window.currentSlide === 15) {
+                // Pastikan banner password kelihatan semula
+                document.getElementById('active-pass-banner-15').classList.remove('opacity-0');
+                
+                startTeacherListener(window.passFeud, 15);
+            }
+            else {
+                if (unsubscribeTeacher) { unsubscribeTeacher(); unsubscribeTeacher = null; }
+            }
+        }
+
+        window.changeSlide = function(dir) {
+            window.currentSlide += dir;
+            if (window.currentSlide < 1) window.currentSlide = 1;
+            if (window.currentSlide > window.totalSlides) window.currentSlide = window.totalSlides;
+            updateSlide();
+        }
+
+        function startTeacherListener(passLetter, slideIndex) {
+            if (unsubscribeTeacher) { unsubscribeTeacher(); unsubscribeTeacher = null; }
+            if (!currentUser) return;
+
+            document.getElementById('api-text').innerText = "SEDIA MENGIMBAS";
+            document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse";
+            window.feudAnswerRevealed = false;
+
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'buzzer_sessions', passLetter);
+            
+            setDoc(docRef, { winner: "", answer: "", lockedOut: [] }, { merge: true }).then(() => {
+                unsubscribeTeacher = onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.winner) {
+                            showBuzzerWinner(data.winner, data.answer, slideIndex);
+                        } else {
+                            if (slideIndex === 11) {
+                                document.getElementById('winner-name-11').innerText = "SISTEM MENUNGGU...";
+                                document.getElementById('typing-status-11').innerHTML = '<div><i class="fas fa-satellite-dish text-amber-500 animate-pulse"></i> Sedia untuk pemain seterusnya...</div>';
+                            } else if (slideIndex === 15) {
+                                document.getElementById('feud-winner-display').classList.add('hidden');
+                            }
+                        }
+                    }
+                }, (error) => {
+                    document.getElementById('api-text').innerText = "RALAT PANGKALAN";
+                    document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-red-500";
+                });
+            });
+        }
+
+        // FUNGSI KHAS GURU: Batal / Kick Budak Yang Terlalu Lambat
+        window.kickWinner = function(slideIndex) {
+            if (confirm("Adakah anda pasti mahu membatalkan pemain ini dan membuka soalan kepada rakan lain?")) {
+                window.triggerRobustRebound(slideIndex);
+            }
+        }
+
+        window.triggerRobustRebound = async function(slideIndex) {
+            if (!currentUser) return;
+            
+            document.getElementById('api-text').innerText = "LANTUNAN SEMULA...";
+            document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-amber-500 animate-pulse";
+            
+            let currentPassRef = slideIndex === 11 ? window.passNormal : window.passFeud;
+            const oldDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'buzzer_sessions', currentPassRef);
+            let newLockedOut = [];
+
+            try {
+                const snap = await getDoc(oldDocRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    newLockedOut = data.lockedOut || [];
+                    if (data.winner && !newLockedOut.includes(data.winner)) {
+                        newLockedOut.push(data.winner); 
+                    }
+                }
+            } catch (e) { console.error(e); }
+
+            if (unsubscribeTeacher) { unsubscribeTeacher(); unsubscribeTeacher = null; }
+            
+            const newPass = generateRandomPass(7);
+            const newDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'buzzer_sessions', newPass);
+            
+            await setDoc(newDocRef, { winner: "", answer: "", lockedOut: newLockedOut });
+
+            // AUTO-SYNC TUNNEL: Tulis kod baharu ke dalam doc lama, supaya telefon pelajar dapat ikut!
+            try {
+                await updateDoc(oldDocRef, { nextPass: newPass });
+            } catch (e) { console.error("Ralat Auto-Sync", e); }
+
+            // RESET UI GURU TANPA TUKAR SLAID
+            if (slideIndex === 11) {
+                window.passNormal = newPass;
+                document.getElementById('prep-pass-11').innerText = newPass;
+                document.getElementById('current-pass-11').innerText = newPass;
+                
+                document.getElementById('active-pass-banner-11').classList.remove('opacity-0');
+                
+                document.getElementById('winner-ui-11').classList.remove('hidden');
+                document.getElementById('winner-ui-11').classList.add('flex');
+                document.getElementById('typing-status-11').innerHTML = '<div><i class="fas fa-keyboard text-amber-500 animate-pulse"></i> Menunggu jawapan dihantar...</div>';
+                document.getElementById('winner-name-11').innerText = "NAMA";
+                
+                startTeacherListener(newPass, 11);
+
+            } else if (slideIndex === 15) {
+                window.passFeud = newPass;
+                document.getElementById('prep-pass-15').innerText = newPass;
+                
+                document.getElementById('active-pass-banner-15').classList.remove('opacity-0');
+                
+                document.getElementById('feud-winner-display').classList.add('hidden');
+                window.feudAnswerRevealed = false;
+                startTeacherListener(newPass, 15);
+            }
+        };
+
+
+        function showBuzzerWinner(name, ans, slideIndex) {
+            if (slideIndex === 15) { 
+                document.getElementById('active-pass-banner-15').classList.add('opacity-0');
+                
+                document.getElementById('feud-winner-name').innerText = name;
+                document.getElementById('feud-winner-display').classList.remove('hidden');
+
+                if (!ans) {
+                    document.getElementById('feud-winner-ans').innerHTML = '<span class="text-amber-500 animate-pulse text-2xl"><i class="fas fa-keyboard"></i> Sedang menaip...</span>';
+                } else {
+                    document.getElementById('feud-winner-ans').innerText = ans;
+                    document.getElementById('api-text').innerText = "JAWAPAN DITERIMA";
+                    document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-green-500";
+
+                    if (!window.feudAnswerRevealed) {
+                        window.feudAnswerRevealed = true;
+                        setTimeout(() => {
+                            let matched = false;
+                            const cleanAns = ans.trim().toUpperCase();
+                            const currentData = feudData[window.currentFeudIndex];
+                            const cards = document.querySelectorAll('.flip-card');
+                            
+                            const matchedAns = currentData.a.find(a => 
+                                a.syn.some(s => cleanAns === s || (cleanAns.length >= 3 && cleanAns.includes(s)) || (s.length >= 3 && s.includes(cleanAns)))
+                            );
+
+                            if (matchedAns) {
+                                const index = currentData.a.indexOf(matchedAns);
+                                if (!cards[index].classList.contains('flipped')) {
+                                    window.revealCard(cards[index], matchedAns.points);
+                                    matched = true;
+                                }
+                            }
+
+                            if (!matched) {
+                            window.addStrike();
+                            if (window.strikes < 3) {
+                                document.getElementById('api-text').innerText = "AUTO REBOUND...";
+                                window.showWrongModalAndRebound(15);
+                            } else {
+                                document.getElementById('api-text').innerText = "PUSINGAN TAMAT";
+                                document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-slate-500";
+                            }
+                        } else {
+                            const allFlipped = document.querySelectorAll('.flip-card:not(.flipped)').length === 0;
+                                if (!allFlipped) {
+                                    document.getElementById('api-text').innerText = "MENERUSKAN LALUAN...";
+                                    setTimeout(() => { window.triggerRobustRebound(15); }, 3500); 
+                                } else {
+                                    document.getElementById('api-text').innerText = "TAHNIAH, SELESAI!";
+                                    document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-blue-500";
+                                }
+                            }
+                        }, 1500);
+                    }
+                }
+            } 
+            else if (slideIndex === 10) { 
+                document.getElementById('pass-container-10').classList.add('hidden');
+                document.getElementById('pass-container-10').classList.remove('inline-block');
+                
+                document.getElementById('winner-container-10').classList.remove('hidden');
+                document.getElementById('winner-container-10').classList.add('flex');
+                document.getElementById('winner-name-10').innerText = name;
+                
+                document.getElementById('api-text').innerText = "PEMENANG BERJAYA DITEMUI";
+                document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-green-500";
+            }
+            else if (slideIndex === 11) { 
+                document.getElementById('active-pass-banner-11').classList.add('opacity-0');
+                
+                document.getElementById('winner-ui-11').classList.remove('hidden');
+                document.getElementById('winner-ui-11').classList.add('flex');
+                document.getElementById('winner-name-11').innerText = name;
+                let statusEl = document.getElementById('typing-status-11');
+                
+                if (!ans) {
+                    statusEl.innerHTML = '<div><i class="fas fa-keyboard text-amber-500 animate-pulse"></i> Menunggu jawapan ditaip...</div>';
+                } else {
+                    const cleanAns = ans.trim().toUpperCase();
+                    
+                    const subjectSyn = ["IBU", "EMAK", "MAMA", "BONDA", "UMMI", "MA", "MAMMY"];
+                    const verbSyn = ["MASAK", "MEMASAK", "MENYEDIAKAN"];
+                    const timeSyn = ["PETANG", "SENJA"];
+
+                    const hasSubject = subjectSyn.some(s => cleanAns.includes(s));
+                    const hasVerb = verbSyn.some(s => cleanAns.includes(s));
+                    const hasTime = timeSyn.some(s => cleanAns.includes(s));
+
+                    if (hasSubject && hasVerb && hasTime) {
+                    statusEl.innerHTML = `
+                        <span class="bg-emerald-100 text-emerald-800 px-8 py-4 rounded-xl border-4 border-emerald-500 font-bangers tracking-widest text-4xl shadow-[6px_6px_0px_#059669] inline-block mt-3">${ans}</span>
+                        <div class="mt-6 text-emerald-600 font-bangers text-4xl animate-bounce"><i class="fas fa-check-circle"></i> TEPAT SEKALI!</div>
+                    `;
+                    document.getElementById('api-text').innerText = "JAWAPAN TEPAT";
+                    document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-green-500";
+                } else {
+                    statusEl.innerHTML = `
+                        <span class="bg-red-100 text-red-800 px-8 py-4 rounded-xl border-4 border-red-500 font-bangers tracking-widest text-4xl shadow-[6px_6px_0px_#7f1d1d] inline-block mt-3" style="text-decoration: line-through;">${ans}</span>
+                        <div class="mt-6 text-red-600 font-bangers text-3xl animate-pulse"><i class="fas fa-times-circle"></i> JAWAPAN KURANG TEPAT!</div>
+                    `;
+                    document.getElementById('api-text').innerText = "JAWAPAN SALAH";
+                    document.getElementById('api-dot').className = "w-3 h-3 rounded-full bg-red-500";
+                    
+                    window.showWrongModalAndRebound(11);
+                }
+            }
+        }
+    };
+
+    window.toggleFullscreen = function() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        window.checkCFU = function(btn, isCorrect, feedbackId = null) {
+            const parent = btn.parentElement;
+            const allBtns = parent.querySelectorAll('button');
+            allBtns.forEach(b => { b.disabled = true; b.classList.add('opacity-50'); });
+
+            if (isCorrect) {
+                btn.classList.add('bg-emerald-500', 'text-white', 'border-emerald-700');
+                if(feedbackId) document.getElementById(feedbackId).classList.remove('hidden');
+            } else {
+                btn.classList.add('bg-red-500', 'text-white');
+            }
+        }
+
+        // ==========================================
+        // DATA CABARAN KOSA KATA BERSERTA SINONIM MANTAP
+        // ==========================================
+        const feudData = [
+            {
+                q: "1. Apakah ucapan atau soalan yang sering ditanya apabila berjumpa rakan baharu?",
+                a: [
+                    { text: "APA KHABAR?", points: 50, syn: ["APA KHABAR", "KHABAR", "KABAR", "SIHAT"] },
+                    { text: "SIAPA NAMA ANDA?", points: 25, syn: ["SIAPA NAMA", "NAMA", "NAMA AWAK", "NAMA ANDA"] },
+                    { text: "TINGGAL DI MANA?", points: 15, syn: ["TINGGAL DI MANA", "DUDUK MANA", "TINGGAL MANA", "ASAL MANA", "ALAMAT"] },
+                    { text: "BERAPA UMUR?", points: 10, syn: ["BERAPA UMUR", "UMUR", "USIA", "UMUR BERAPA"] }
+                ]
+            },
+            {
+                q: "2. Sebutkan 4 frasa waktu atau masa yang selalu digunakan dalam karangan.",
+                a: [
+                    { text: "PADA WAKTU PAGI", points: 40, syn: ["PAGI", "WAKTU PAGI", "SUBUH", "AWAL PAGI"] },
+                    { text: "TENGAH HARI", points: 25, syn: ["TENGAH HARI", "TENGAHARI", "ZOHOR", "SIANG"] },
+                    { text: "WAKTU PETANG", points: 20, syn: ["PETANG", "WAKTU PETANG", "ASAR", "LEWAT PETANG"] },
+                    { text: "PADA WAKTU MALAM", points: 15, syn: ["MALAM", "WAKTU MALAM", "ISYAK", "TENGAH MALAM"] }
+                ]
+            },
+            {
+                q: "3. Selain kucing, namakan 4 haiwan peliharaan yang popular di rumah.",
+                a: [
+                    { text: "ANJING", points: 45, syn: ["ANJING", "DOG"] },
+                    { text: "BURUNG", points: 25, syn: ["BURUNG", "BIRD"] },
+                    { text: "IKAN", points: 20, syn: ["IKAN", "FISH", "IKAN LAGA"] },
+                    { text: "ARNAB", points: 10, syn: ["ARNAB", "RABBIT"] }
+                ]
+            },
+            {
+                q: "4. Namakan 4 hobi yang sering disebut semasa sesi pengenalan diri.",
+                a: [
+                    { text: "MEMBACA", points: 40, syn: ["MEMBACA", "BACA BUKU", "BACA NOVEL", "MEMBACA BUKU"] },
+                    { text: "BERSUKAN", points: 30, syn: ["BERSUKAN", "MAIN SUKAN", "MAIN BOLA", "BERMAIN SUKAN", "BADMINTON"] },
+                    { text: "MELUKIS", points: 20, syn: ["MELUKIS", "MENGGAMBAR", "LUKIS", "MEWARNA"] },
+                    { text: "BERENANG", points: 10, syn: ["BERENANG", "MANDI KOLAM", "RENANG", "SWIMMING"] }
+                ]
+            },
+            {
+                q: "5. Sebutkan 4 aktiviti yang sering dilakukan bersama keluarga pada hujung minggu.",
+                a: [
+                    { text: "BERKELAH", points: 45, syn: ["BERKELAH", "PIKNIK", "PICNIC", "MANDI LAUT", "MANDI SUNGAI"] },
+                    { text: "MENONTON WAYANG", points: 25, syn: ["MENONTON WAYANG", "TENGOK WAYANG", "WAYANG", "TENGOK TV", "MENONTON FILEM"] },
+                    { text: "MEMBELI-BELAH", points: 15, syn: ["MEMBELI-BELAH", "MEMBELI BELAH", "SHOPPING", "BELI BARANG", "KE MALL"] },
+                    { text: "BERSENAM", points: 15, syn: ["BERSENAM", "JOGING", "JOGGING", "BERIADAH", "BERJALAN DI TAMAN"] }
+                ]
+            },
+            {
+                q: "6. Namakan 4 bulan dalam setahun yang bermula dengan huruf 'M' atau 'J'.",
+                a: [
+                    { text: "JANUARI", points: 35, syn: ["JANUARI", "JANUARY", "JAN"] },
+                    { text: "JULAI", points: 30, syn: ["JULAI", "JULY", "JUL"] },
+                    { text: "MAC", points: 20, syn: ["MAC", "MARCH", "MAR"] },
+                    { text: "MEI", points: 15, syn: ["MEI", "MAY"] }
+                ]
+            },
+            {
+                q: "7. Sebutkan 4 kata kerja yang digunakan untuk menceritakan rutin pagi.",
+                a: [
+                    { text: "MANDI", points: 40, syn: ["MANDI", "BERMANDI", "MANDI PAGI"] },
+                    { text: "BERSARAPAN", points: 30, syn: ["BERSARAPAN", "SARAPAN", "MAKAN PAGI", "BREAKFAST"] },
+                    { text: "MENGGOSOK GIGI", points: 20, syn: ["MENGGOSOK GIGI", "GOSOK GIGI", "MEMBERUS GIGI", "BERUS GIGI"] },
+                    { text: "MEMAKAI BAJU", points: 10, syn: ["MEMAKAI BAJU", "PAKAI BAJU", "TUKAR BAJU", "MEMAKAI PAKAIAN"] }
+                ]
+            },
+            {
+                q: "8. Siapakah ahli keluarga yang biasanya mempunyai lingkungan umur lebih tua daripada anda?",
+                a: [
+                    { text: "DATUK", points: 35, syn: ["DATUK", "ATUK", "TOK", "GRANDPA"] },
+                    { text: "NENEK", points: 30, syn: ["NENEK", "OPAH", "TOK WAN", "GRANDMA"] },
+                    { text: "BAPA", points: 20, syn: ["BAPA", "AYAH", "ABAH", "WALID", "PAPA", "FATHER"] },
+                    { text: "IBU", points: 15, syn: ["IBU", "EMAK", "MAMA", "UMMI", "BONDA", "MOTHER"] }
+                ]
+            },
+            {
+                q: "9. Namakan 4 tempat yang sering dikunjungi selepas tamat waktu persekolahan.",
+                a: [
+                    { text: "RUMAH", points: 50, syn: ["RUMAH", "KEDIAMAN", "BALIK RUMAH", "HOME"] },
+                    { text: "PUSAT TUISYEN", points: 25, syn: ["PUSAT TUISYEN", "TUISYEN", "KELAS TAMBAHAN", "TUITION"] },
+                    { text: "PADANG", points: 15, syn: ["PADANG", "TAMAN", "GELANGGANG", "COURT", "PADANG SEKOLAH"] },
+                    { text: "PERPUSTAKAAN", points: 10, syn: ["PERPUSTAKAAN", "LIBRARY", "PUSAT SUMBER", "PSS"] }
+                ]
+            },
+            {
+                q: "10. Sebutkan 4 kerjaya atau cita-cita yang popular dalam kalangan pelajar sekolah.",
+                a: [
+                    { text: "DOKTOR", points: 40, syn: ["DOKTOR", "DOCTOR", "DOKTER"] },
+                    { text: "GURU", points: 30, syn: ["GURU", "CIKGU", "PENDIDIK", "USTAZ", "USTAZAH", "TEACHER"] },
+                    { text: "POLIS", points: 20, syn: ["POLIS", "PEGAWAI POLIS", "POLICE", "INSPEKTOR"] },
+                    { text: "JURUTERA", points: 10, syn: ["JURUTERA", "ENGINEER"] }
+                ]
+            }
+        ];
+
+        window.currentFeudIndex = 0;
+        window.totalFeudScore = 0;
+        window.strikes = 0;
+
+        window.populateVIP = function() {
+            const list = document.getElementById('vip-feud-list');
+            list.innerHTML = '';
+            feudData.forEach((data, index) => {
+                let html = `<div class="bg-slate-800 p-4 rounded-xl text-slate-200 border border-slate-700">`;
+                html += `<p class="font-bold text-amber-300 mb-3 text-sm">${data.q}</p>`;
+                html += `<div class="grid grid-cols-1 gap-2 text-xs">`;
+                data.a.forEach(ans => {
+                    html += `<div class="flex flex-col bg-slate-900 px-3 py-2 rounded border border-slate-700">
+                                <div class="flex justify-between items-center w-full mb-1">
+                                    <span class="font-bold text-emerald-400">${ans.text}</span> 
+                                    <span class="text-blue-400 font-black">${ans.points} pt</span>
+                                </div>
+                                <span class="text-[10px] text-slate-500 italic">Diterima: ${ans.syn.join(', ')}</span>
+                             </div>`;
+                });
+                html += `</div></div>`;
+                list.innerHTML += html;
+            });
+        };
+
+        window.exitVIP = function() {
+            setStudentUI('status-wait');
+        };
+
+        function loadFeudQuestion() {
+            window.feudAnswerRevealed = false;
+            const data = feudData[window.currentFeudIndex];
+            document.getElementById('feud-question').innerText = data.q;
+            document.getElementById('feud-counter').innerText = `S${window.currentFeudIndex + 1} / ${feudData.length}`;
+            
+            window.totalFeudScore = 0;
+            window.strikes = 0;
+            document.getElementById('feud-total-score').innerText = window.totalFeudScore;
+            updateStrikeDisplay();
+            document.getElementById('feud-winner-display').classList.add('hidden');
+
+            const board = document.getElementById('feud-board-container');
+            board.innerHTML = '';
+            
+            data.a.forEach((ans, index) => {
+                const card = document.createElement('div');
+                card.className = "flip-card";
+                
+                card.innerHTML = `
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="number-circle">${index + 1}</div>
+                        </div>
+                        <div class="flip-card-back">
+                            <span class="font-bold text-2xl md:text-3xl uppercase tracking-wider">${ans.text}</span>
+                            <span class="font-bangers text-3xl md:text-4xl text-blue-800 bg-blue-100 px-3 py-1 border-2 border-blue-300 rounded">${ans.points}</span>
+                        </div>
+                    </div>
+                `;
+                board.appendChild(card);
+            });
+        }
+
+        window.revealCard = function(cardElement, points) {
+            if (!cardElement.classList.contains('flipped')) {
+                cardElement.classList.add('flipped');
+                window.totalFeudScore += points;
+                animateScore(window.totalFeudScore);
+            }
+        }
+
+        function animateScore(targetScore) {
+            const scoreEl = document.getElementById('feud-total-score');
+            scoreEl.innerText = targetScore;
+            scoreEl.classList.add('scale-150', 'text-white');
+            setTimeout(() => {
+                scoreEl.classList.remove('scale-150', 'text-white');
+            }, 300);
+        }
+
+        window.addStrike = function() {
+            if (window.strikes < 3) {
+                window.strikes++;
+                updateStrikeDisplay();
+                const board = document.querySelector('.feud-board');
+                board.style.borderColor = '#ef4444';
+                setTimeout(() => { board.style.borderColor = '#fbbf24'; }, 500);
+            }
+        }
+
+        function updateStrikeDisplay() {
+            const display = document.getElementById('strike-display');
+            let content = '';
+            for(let i=0; i<3; i++) {
+                if(i < window.strikes) {
+                    content += `<span class="strike-x animate-popIn">X</span>`;
+                } else {
+                    content += `<span class="text-slate-700 opacity-20">X</span>`;
+                }
+            }
+            display.innerHTML = content;
+        }
+
+        window.nextFeud = function() {
+            if (window.currentFeudIndex < feudData.length - 1) {
+                window.currentFeudIndex++;
+                loadFeudQuestion();
+                window.triggerRobustRebound(15);
+            }
+        }
+
+        window.prevFeud = function() {
+            if (window.currentFeudIndex > 0) {
+                window.currentFeudIndex--;
+                loadFeudQuestion();
+                window.triggerRobustRebound(15);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (document.getElementById('teacher-view').style.display !== 'none') {
+                if(e.key === 'ArrowRight') { e.preventDefault(); window.changeSlide(1); }
+                if(e.key === 'ArrowLeft') window.changeSlide(-1);
+                if(e.key.toLowerCase() === 'f') window.toggleFullscreen();
+            }
+        });
+
+    </script>
+</body>
+</html>
